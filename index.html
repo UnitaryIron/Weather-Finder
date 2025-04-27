@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather Finder</title>
+    <link rel="icon" type="image/png" href="black cloud.jpeg" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1>Weather Finder</h1>
+    <div class="weather-dashboard">
+      <h2>Search Weather</h2>
+      <input type="text" id="cityInput" placeholder="Enter city name" />
+      <button onclick="getWeather()">Get Weather</button>
+
+      <!-- Spinner (Initially hidden) -->
+      <div
+        id="loading"
+        style="text-align: center; padding-top: 50px; display: none"
+      >
+        <img src="Loading_icon.gif" alt="Loading..." />
+        <p>Loading weather data...</p>
+      </div>
+
+      <!-- Weather Results (Initially empty) -->
+      <div id="weatherResult" style="text-align: center; margin-top: 20px">
+        <!-- Weather results will appear here -->
+      </div>
+    </div>
+
+    <!-- Weather animations -->
+    <style>
+      body.sunny {
+        background-color: #87ceeb; /* Light Sky Blue */
+        animation: sunny 10s infinite;
+      }
+
+      body.rainy {
+        background-color: #b0c4de; /* Light Steel Blue */
+        animation: rain 3s linear infinite;
+      }
+
+      body.cloudy {
+        background-color: #d3d3d3; /* Light Grey */
+        animation: cloudy 10s infinite;
+      }
+
+      body.snowy {
+        background-color: #f0f8ff; /* Alice Blue */
+        animation: snow 5s linear infinite;
+      }
+
+      body.stormy {
+        background-color: #4b0082; /* Indigo */
+        animation: storm 5s linear infinite;
+      }
+
+      @keyframes sunny {
+        0% {
+          background-color: #87ceeb;
+        }
+        50% {
+          background-color: #add8e6;
+        }
+        100% {
+          background-color: #87ceeb;
+        }
+      }
+
+      @keyframes rain {
+        0% {
+          background-position: 0 0;
+        }
+        100% {
+          background-position: 0 100%;
+        }
+      }
+
+      @keyframes cloudy {
+        0% {
+          background-color: #d3d3d3;
+        }
+        50% {
+          background-color: #b0c4de;
+        }
+        100% {
+          background-color: #d3d3d3;
+        }
+      }
+
+      @keyframes snow {
+        0% {
+          background-color: #f0f8ff;
+        }
+        100% {
+          background-color: #add8e6;
+        }
+      }
+
+      @keyframes storm {
+        0% {
+          background-color: #4b0082;
+        }
+        50% {
+          background-color: #800080;
+        }
+        100% {
+          background-color: #4b0082;
+        }
+      }
+    </style>
+
+    <script>
+      async function getWeather() {
+        const city = document.getElementById("cityInput").value;
+        const apiKey = "596e8b65ed6d41ce8ff133335252704";
+        const url = `http://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${city}`;
+
+        // Show the spinner while fetching data
+        document.getElementById("loading").style.display = "block";
+
+        try {
+          const response = await fetch(url);
+          const data = await response.json();
+
+          // Check if the response contains valid weather data
+          if (data.error) {
+            document.getElementById(
+              "weatherResult"
+            ).innerHTML = `<p>Error: ${data.error.message}</p>`;
+          } else {
+            // Display the weather data
+            document.getElementById("weatherResult").innerHTML = `
+              <h2>${data.location.name}, ${data.location.country}</h2>
+              <p>Temperature: ${data.current.temp_c}°C</p>
+              <p>Condition: ${data.current.condition.text}</p>
+              <img src="https:${data.current.condition.icon}" alt="Weather icon">
+            `;
+
+            // Get the weather condition text
+            const condition = data.current.condition.text.toLowerCase();
+
+            // Change background animation based on the weather condition
+            changeWeatherAnimation(condition);
+          }
+        } catch (error) {
+          document.getElementById(
+            "weatherResult"
+          ).innerHTML = `<p>Error fetching weather data. Please try again.</p>`;
+        } finally {
+          // Hide the spinner after results are fetched or if there's an error
+          document.getElementById("loading").style.display = "none";
+        }
+      }
+
+      function changeWeatherAnimation(condition) {
+        // Reset classes before applying a new one
+        document.body.classList.remove(
+          "sunny",
+          "rainy",
+          "cloudy",
+          "snowy",
+          "stormy"
+        );
+
+        // Apply the correct animation class based on the weather condition
+        if (condition.includes("rain")) {
+          document.body.classList.add("rainy");
+        } else if (condition.includes("cloud")) {
+          document.body.classList.add("cloudy");
+        } else if (condition.includes("snow")) {
+          document.body.classList.add("snowy");
+        } else if (
+          condition.includes("storm") ||
+          condition.includes("thunder")
+        ) {
+          document.body.classList.add("stormy");
+        } else {
+          document.body.classList.add("sunny");
+        }
+      }
+    </script>
+  </body>
+</html>
